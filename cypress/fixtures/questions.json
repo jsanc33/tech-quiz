@@ -1,0 +1,11 @@
+[
+  {
+    "question": "What is the name of Han Solo's ship?",
+    "answers": [
+      { "text": "Millennium Falcon", "isCorrect": true },
+      { "text": "Star Destroyer", "isCorrect": false },
+      { "text": "X-Wing", "isCorrect": false },
+      { "text": "TIE Fighter", "isCorrect": false }
+    ]
+  }
+]
