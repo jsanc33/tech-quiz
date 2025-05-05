@@ -1,23 +1,48 @@
-import React from 'react'
-import Word from '../../client/src/components/Word/index'
-import { mockState } from '../support/utils/helpers'
-import '@testing-library/cypress/add-commands'
+import Quiz from "../../client/src/components/Quiz"
 
-describe('<Word />', () => {
-  it('should render initial game state', () => {
-    // see: https://on.cypress.io/mounting-react
-    cy.mount(<Word
-      word={mockState.maskedWord} />
-    )
+describe('Quiz Component', () => {
+  beforeEach(() => {
+    cy.intercept({
+        method: 'GET',
+        url: '/api/questions/random'
+      },
+      {
+        fixture: 'questions.json',
+        statusCode: 200
+      }
+      ).as('getAQuestion')
+    });
 
-    cy.findByText(mockState.maskedWord).should('exist')
-  })
+  it('should start my quiz & display my first question', () => {
+    cy.mount(<Quiz />);
+    cy.get('button').contains('Start Quiz').click();
+    cy.get('.card').should('be.visible');
+    cy.get('h2').should('not.be.empty');
+  });
 
+  it('should answer my questions & complete my quiz', () => {
+    cy.mount(<Quiz />);
+    cy.get('button').contains('Start Quiz').click();
 
-  it('should update the game state when a correct letter is guessed', () => {
-    const handleGuess = cy.stub().as('handleGuess');
-    cy.mount(<Word word='T__t' guesses={['t']} handleGuess={handleGuess} />);
+    // Answer questions
+    cy.get('button').contains('1').click();
 
-    cy.findByText('T__t').should('exist');
-  })
-})
+    // Verify the quiz completion
+    cy.get('.alert-success').should('be.visible').and('contain', 'Your score');
+  });
+
+  it('should restart my quiz when the game is done', () => {
+    cy.mount(<Quiz />);
+    cy.get('button').contains('Start Quiz').click();
+
+    // Answer questions
+    cy.get('button').contains('1').click();
+
+    // Restart the quiz
+    cy.get('button').contains('Take New Quiz').click();
+
+    // Verify the quiz is restarted
+    cy.get('.card').should('be.visible');
+    cy.get('h2').should('not.be.empty');
+  });
+});
